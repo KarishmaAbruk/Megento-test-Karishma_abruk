@@ -1,0 +1,10 @@
+- name: Install varnish
+  apt:
+    name: varnish
+    state: present
+
+- name: Ensure varnish enabled
+  service:
+    name: varnish
+    state: started
+    enabled: yes
