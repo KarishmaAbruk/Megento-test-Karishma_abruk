@@ -1,0 +1,23 @@
+- name: Install mysql server
+  apt:
+    name: mysql-server
+    state: present
+
+- name: Ensure MySQL is started
+  service:
+    name: mysql
+    state: started
+    enabled: yes
+
+- name: Create magento database
+  mysql_db:
+    name: magento2
+    state: present
+
+- name: Create magento DB user
+  mysql_user:
+    name: magento
+    password: "{{ magento_db_password }}"
+    priv: "magento2.*:ALL"
+    host: "localhost"
+    state: present
