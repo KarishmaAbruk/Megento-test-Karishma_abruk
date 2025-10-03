@@ -1,0 +1,45 @@
+- name: Create magento root
+  file:
+    path: "{{ magento_root }}"
+    state: directory
+    owner: test-ssh
+    group: clp
+    mode: 0775
+
+- name: Ensure composer is installed
+  get_url:
+    url: https://getcomposer.org/installer
+    dest: /tmp/composer-setup.php
+  register: composer_setup
+
+- name: Install composer binary
+  command: php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer creates=/usr/local/bin/composer
+
+- name: Install magento via composer (if using composer repo keys)
+  become_user: test-ssh
+  shell: |
+    cd /tmp
+    composer create-project --repository=https://repo.magento.com/ magento/project-community-edition magento-src --no-interaction
+    rsync -a magento-src/ {{ magento_root }}/
+  args:
+    creates: "{{ magento_root }}/bin/magento"
+
+- name: Magento setup install
+  become_user: test-ssh
+  shell: |
+    cd {{ magento_root }}
+    php bin/magento setup:install \
+      --base-url=https://{{ magento_base_domain }} \
+      --db-host=127.0.0.1 \
+      --db-name=magento2 \
+      --db-user=magento \
+      --db-password='{{ magento_db_password }}' \
+      --admin-firstname=Admin \
+      --admin-lastname=User \
+      --admin-email=admin@{{ magento_base_domain }} \
+      --admin-user=admin \
+      --admin-password='{{ magento_admin_password }}' \
+      --search-engine=elasticsearch7 \
+      --elasticsearch-host=127.0.0.1 \
+      --elasticsearch-port=9200 \
+      --use-rewrites=1
