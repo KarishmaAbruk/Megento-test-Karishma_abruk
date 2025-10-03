@@ -1,0 +1,19 @@
+- name: Configure Magento host
+  hosts: magento
+  become: true
+  vars:
+    magento_base_domain: test.mgt.com
+    pma_domain: pma.mgt.com
+    magento_db_password: "changeme"
+    magento_admin_password: "Admin123!"
+    magento_root: /var/www/magento
+  roles:
+    - role: common
+    - role: php
+    - role: mysql
+    - role: elastic
+    - role: redis
+    - role: varnish
+    - role: nginx
+    - role: phpmyadmin
+    - role: magento
