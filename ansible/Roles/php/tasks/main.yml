@@ -1,0 +1,40 @@
+- name: Add Sury PHP repo GPG key
+  apt_key:
+    url: https://packages.sury.org/php/apt.gpg
+    state: present
+
+- name: Add Sury repository
+  apt_repository:
+    repo: "deb https://packages.sury.org/php/ {{ ansible_lsb.codename }} main"
+    state: present
+
+- name: Install PHP and extensions
+  apt:
+    name:
+      - php8.3-fpm
+      - php8.3-cli
+      - php8.3-mysql
+      - php8.3-xml
+      - php8.3-mbstring
+      - php8.3-curl
+      - php8.3-intl
+      - php8.3-bcmath
+      - php8.3-gd
+      - php8.3-soap
+    state: present
+    update_cache: yes
+
+- name: Create php-fpm pool for magento
+  copy:
+    dest: /etc/php/8.3/fpm/pool.d/magento.conf
+    content: |
+      [magento]
+      user = test-ssh
+      group = clp
+      listen = /run/php/php8.3-fpm-magento.sock
+      pm = dynamic
+      pm.max_children = 20
+      pm.start_servers = 2
+      pm.min_spare_servers = 1
+      pm.max_spare_servers = 3
+  notify: restart php-fpm
