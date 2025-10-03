@@ -2,3 +2,7 @@
   service:
     name: php8.3-fpm
     state: restarted
+
+- name: reload nginx
+  service: name=nginx state=reloaded
+
