@@ -1,0 +1,4 @@
+- name: restart php-fpm
+  service:
+    name: php8.3-fpm
+    state: restarted
