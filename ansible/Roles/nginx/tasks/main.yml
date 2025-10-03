@@ -1,0 +1,42 @@
+- name: Ensure group clp exists
+  group:
+    name: clp
+    state: present
+
+- name: Ensure user test-ssh exists
+  user:
+    name: test-ssh
+    groups: clp
+    shell: /bin/bash
+    create_home: yes
+
+- name: Install nginx
+  apt: { name: nginx, state: present }
+
+- name: Set nginx run user to test-ssh
+  lineinfile:
+    path: /etc/nginx/nginx.conf
+    regexp: '^user '
+    line: 'user test-ssh;'
+    backrefs: no
+  notify: reload nginx
+
+- name: Create self-signed cert
+  openssl_certificate:
+    path: /etc/ssl/certs/magento-selfsigned.crt
+    privatekey_path: /etc/ssl/private/magento-selfsigned.key
+    common_name: "{{ magento_base_domain }}"
+    provider: selfsigned
+    state: present
+
+- name: Upload nginx site config
+  template:
+    src: magento.nginx.j2
+    dest: /etc/nginx/sites-available/magento.conf
+  notify: reload nginx
+
+- name: Enable site
+  file:
+    src: /etc/nginx/sites-available/magento.conf
+    dest: /etc/nginx/sites-enabled/magento.conf
+    state: link
