@@ -1,0 +1,16 @@
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Ensure essential packages are installed
+  apt:
+    name:
+      - git
+      - curl
+      - unzip
+      - apt-transport-https
+      - ca-certificates
+      - gnupg
+      - lsb-release
+    state: present
